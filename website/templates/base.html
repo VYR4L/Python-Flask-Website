@@ -32,6 +32,10 @@
                 {% else %}
                     <a class="nav-item nav-link" id="sign-up" href="/sign-up">Sign up</a>
                     <a class="nav-item nav-link" id="logout" href="/logout">Logout</a>
+                    <a class="nav-item nav-link" id="admin" href="/admin">Admin</a>
+                {% endif %}
+                {% if user.is_superuser %}
+                <a class="nav-item nav-link" id="users" href="/users">Users</a>
                 {% endif %}
             </div>
 
@@ -81,7 +85,8 @@
         crossorigin="anonymous"
     ></script>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='deleteNote.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='deleteUser.js') }}"></script>
     
   </body>
 </html

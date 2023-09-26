@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, abort
 from .models import User, db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 
 auth = Blueprint('auth', __name__)
+AUTHENTICATIONCODE = '07b9c296eb76'
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -59,7 +60,48 @@ def sign_up():
             login_user(new_user, remember=True)
             flash('Account created!', category='success')
             return redirect(url_for('views.home'))
-            
-
 
     return render_template("sign_up.html", user=current_user)
+
+@auth.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        first_name = request.form.get('firstName')
+        password1 = request.form.get('password1')
+        password2 = request.form.get('password2')
+        code = request.form.get('code')
+
+        user = User.query.filter_by(email=email).first()
+        if user:
+            flash('Email already exists.', category='error')
+        elif len(email) < 4:
+            flash('Email must be greater than 3 characters.', category='error')
+        elif len(first_name) < 2:
+            flash('First name must be greater than 1 character.', category='error')
+        elif password1 != password2:
+            flash('Passwords don\'t match.', category='error')
+        elif len(password1) < 7:
+            flash('Password must be at least 7 characters.', category='error')
+        elif code != AUTHENTICATIONCODE:
+            flash('Wrong code.', category='error')
+        else:
+            new_super_user = User(email=email, first_name=first_name, password=generate_password_hash(
+                password1, method='sha256'), is_superuser=True)
+            db.session.add(new_super_user)
+            db.session.commit()
+            login_user(new_super_user, remember=True)
+            flash('Super Account created!', category='success')
+
+    return render_template("admin.html", user=current_user)
+
+
+@auth.route('/users', methods=['GET', 'POST'])
+@login_required
+def list_users():
+    if not current_user.is_superuser:
+        flash('User does not have enough permission to access the page', category='error')
+        return redirect(url_for('auth.admin'))
+    
+    users = User.query.all()
+    return render_template("list_users.html", users=users, user=current_user)
