@@ -96,7 +96,7 @@ def admin():
     return render_template("admin.html", user=current_user)
 
 
-@auth.route('/users', methods=['GET', 'POST'])
+@auth.route('/users')
 @login_required
 def list_users():
     if not current_user.is_superuser:

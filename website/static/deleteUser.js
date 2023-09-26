@@ -1,15 +1,14 @@
 function deleteUser(userId) {
-    fetch("/delete-user", {
-        method: "POST",
+    fetch(`/user/${userId}`, {
+        method: "DELETE",
         headers: {
             "Content-Type": "application/json" 
         },
-        body: JSON.stringify({ userId: userId }),
     }).then((response) => {
         if (response.ok) {
             return response.json();
         } else {
-            throw new Error('Erro ao excluir o usuário');
+            throw new Error('Error deleting user');
         }
     }).then((data) => {
         window.location.reload();
